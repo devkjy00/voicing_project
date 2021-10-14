@@ -65,7 +65,7 @@ class musico():
     def progression():
         pass
 
-    def four_part(self, topnote, chord, Tension):
+    def four_part(self, topnote, chord, Tension, time):
         # 탑 노트 아래로 메커니컬 보이싱을 생성
         # 모든 음역대를 선택하고 위에서 4개의 음만 반환하는 방식으로 시작하자
         voicing_tone = []
@@ -113,15 +113,15 @@ class musico():
         voicing_tone.append(chord_func[0]+'1')
         voicing_tone.insert(0, topnote)
         # 사운드 플레이
-        self.play_notes(voicing_tone)
+        self.play_notes(voicing_tone, time)
 
-    def play_notes(self, notes):
+    def play_notes(self, notes, t):
         for note in notes:
             pygame.mixer.Sound(
                 date_path+'/'+note+'.wav').play()
             print(note)
             # time.sleep(0.1)
-        time.sleep(2)
+        time.sleep(t)
 
     def decollate_chord_func(self, chord):
         # 먼저 앞2글자 슬라이싱
@@ -272,10 +272,25 @@ date_path = os.path.join(current_path, "data")
 scale_list = os.listdir(date_path)
 
 C = musico("C")
-C.four_part('G4', 'Em7', [True, [9, 13]])
-C.four_part('A4', 'Dm7', [True, [9, 13]])
-C.four_part('B4', 'G7', [True, [9, 13]])
-C.four_part('C4', 'E7', [True, [9, 13]])
-C.four_part('D4', 'Dm7', [True, [9, 11, 13]])
+tension_list = [[9], [13], [11], [9, 11], [9, 13], [11, 13], [9, 11, 13]]
+
+
+# for i in tension_list:
+
+C.four_part('G3', 'CM7', [True, [9, 13]], 3)
+C.four_part('C4', 'E7', [True, [9, 13]], 2)
+C.four_part('Ab3', 'E7', [True, [9, 13]], 1.5)
+C.four_part('B3', 'FM7', [True, [9, 13]], 2)
+C.four_part('A3', 'FM7', [True, [9, 13]], 1.5)
+C.four_part('A3', 'A7', [True, [9, 13]], 3)
+C.four_part('A3', 'Dm7', [True, [9, 13]], 3)
+C.four_part('F4', 'A7', [True, [9, 13]], 2)
+C.four_part('Db4', 'A7', [True, [9, 13]], 1.5)
+C.four_part('E4', 'D7', [True, [9, 13]], 2)
+C.four_part('D4', 'D7', [True, [9, 13]], 1.5)
+C.four_part('D4', 'G7', [True, [9, 13]], 1.5)
+C.four_part('E4', 'G7', [True, [9, 13]], 1.5)
+C.four_part('F4', 'G7', [True, [9, 13]], 1.5)
+
 
 # root.mainloop()
