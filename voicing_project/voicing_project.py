@@ -65,7 +65,7 @@ class musico():
     def progression():
         pass
 
-    def four_part(self, topnote, chord):
+    def four_part(self, topnote, chord, Tension):
         # 탑 노트 아래로 메커니컬 보이싱을 생성
         # 모든 음역대를 선택하고 위에서 4개의 음만 반환하는 방식으로 시작하자
         voicing_tone = []
@@ -76,15 +76,21 @@ class musico():
         # 탑 노트 아래의 음역대를 선택(슬라이싱)
         sliced_chro_fromTop = self.get_scale_range(topnote)
         # 텐션 찾기
-        tensions = self.get_tension(chord_func)
+        tensions, chord_compare = self.get_tension(chord_func)
         # 찾은 텐션으로 보이싱 경우의 수 만들기(코드폼 반환)
-        tension_tone = self.tension_voicing(tensions, chord_func)
+        tension_tone = self.tension_voicing(
+            tensions, chord_func, chord_compare, Tension)
+        if Tension[0] == True:
+            the_chord = tension_tone
+        else:
+            the_chord = musico._chord_tone[chord_func[1]]
+
         # 코드의 근음 위치 선택/ 탑노트와 같은 옥타브 또는 아래쪽에 코드근음이 있는지 확인
         if chord_func[0]+topnote_func[1] in sliced_chro_fromTop:    # 같은 옥타브에 근음이있는 경우
             # 근음 위치 인덱스구하기
             Root_idx = sliced_chro_fromTop.index(chord_func[0]+topnote_func[1])
             # 코드폼 인덱스 가져와서 한개씩 값 대입
-            for idx in musico._chord_tone[chord_func[1]]:
+            for idx in the_chord:
                 # 근음부터 위로 올라가면서 코드톤 쌓고 탑노트 위에 음은 옥타브 내리기
                 try:
                     voicing_tone.append(sliced_chro_fromTop[Root_idx+idx])
@@ -95,7 +101,7 @@ class musico():
             Root_idx = sliced_chro_fromTop.index(
                 chord_func[0]+str(int(topnote_func[1])-1))
             # 코드폼 인덱스 가져와서 한개씩 값 대입
-            for idx in musico._chord_tone[chord_func[1]]:
+            for idx in the_chord:
                 try:
                     voicing_tone.append(sliced_chro_fromTop[Root_idx+idx])
                 except:
@@ -104,8 +110,8 @@ class musico():
         # 드랍 하기
 
         # 마지막으로 탑노트와 베이스근음 넣기
-        voicing_tone.append(topnote)
         voicing_tone.append(chord_func[0]+'1')
+        voicing_tone.insert(0, topnote)
         # 사운드 플레이
         self.play_notes(voicing_tone)
 
@@ -113,8 +119,9 @@ class musico():
         for note in notes:
             pygame.mixer.Sound(
                 date_path+'/'+note+'.wav').play()
+            print(note)
             # time.sleep(0.1)
-        time.sleep(1)
+        time.sleep(2)
 
     def decollate_chord_func(self, chord):
         # 먼저 앞2글자 슬라이싱
@@ -171,12 +178,48 @@ class musico():
         # 다이아토닉 스케일을 코드를 근음으로 재정열 하고 인덱스를 이용해서 카테고리화, 텐션음들을 저장
         resorted_notes = notes[dia_chord_idx:]+notes[:dia_chord_idx]
         print(resorted_notes)
+        tension_tone = []
         tensions = [resorted_notes[1], resorted_notes[3], resorted_notes[5]]
-        return tensions
+        Root_idx = musico._sorted_chromatic_scale.index(cho_func[0]+'2')
+        resorted_cromatic = musico._sorted_chromatic_scale[Root_idx:]
+        for tension in tensions:
+            if tension+'2' in resorted_cromatic:
+                tension_tone.append(resorted_cromatic.index(tension+'2'))
+            elif tension+'3' in resorted_cromatic:
+                tension_tone.append(resorted_cromatic.index(tension+'3'))
+        return tension_tone, chord_compare
 
-    def tension_voicing(self, tensions, cho_func):
-        # 근음 카테고리
-        pass
+    def tension_voicing(self, tension_tone, cho_func, chord_compare, Tension):
+        print(Tension[1], '음을 사용')
+        if self._key[-1:] == 'm':
+            paralal = 3
+        else:
+            paralal = 0
+        voicing_tone = []
+        # 인풋코드의 카테고리별 텐션 넣기
+        # 근음 카테고리: 9
+        if 9 in Tension[1] and cho_func[0] != self._dia_chords[paralal+2][0]:   # 프리지안이 아닌경우
+            voicing_tone.append(tension_tone[0])    # 9,b9
+        else:
+            voicing_tone.append(0)
+        # voicing_tone.append(tension_tone[0]+2)  # #9
+        # 3음 카테고리 : 9,11
+        if 11 in Tension[1] and cho_func[0] != self._dia_chords[paralal][0]:    # 아이오니안이 아닌 경우
+            voicing_tone.append(tension_tone[1])    # 11,#11
+        else:
+            voicing_tone.append(musico._chord_tone[cho_func[1]][1])
+        # 5음 카테고리 : 11,13
+        if 13 in Tension[1]:
+            # voicing_tone.append(tension_tone[1])    # 11,#11
+            voicing_tone.append(tension_tone[2])    # 13,b13
+        else:
+            voicing_tone.append(musico._chord_tone[cho_func[1]][2])
+        # 7음 카테고리 :
+        voicing_tone.append(musico._chord_tone[cho_func[1]][3])
+        if cho_func[1] in musico. _sorted_dia_chord_form:
+            pass
+        return voicing_tone
+
 # def play_diatonic7th_chord_progression(chromatic_scales, dia_note_idx,  dia_chord_form):
     #     # 완성된 다이아토닉 코드변수 [0]계이름,[1]코드폼
     #     diatonic = []
@@ -229,6 +272,10 @@ date_path = os.path.join(current_path, "data")
 scale_list = os.listdir(date_path)
 
 C = musico("C")
-C.four_part('E4', 'Am7')
+C.four_part('G4', 'Em7', [True, [9, 13]])
+C.four_part('A4', 'Dm7', [True, [9, 13]])
+C.four_part('B4', 'G7', [True, [9, 13]])
+C.four_part('C4', 'E7', [True, [9, 13]])
+C.four_part('D4', 'Dm7', [True, [9, 11, 13]])
 
 # root.mainloop()
