@@ -8,6 +8,9 @@
 # 키 입력 -> 장,단조확인 -> 근음 기준 음 간격,코드폼,크로매틱 재정렬  -> 음 간격 더해서 음위치 생성
 # -> 정렬된 4옥타브 크로매틱에서 슬라이싱[근음:]과 코드 폼에 따른 음 간격을 누적합해서 코드생성
 
+# 현재 탑노트 아래로 closed voicing 만들었으니까 이제 카테고리 보이싱 추가해보자@@ 다이아토닉이랑 연계해서 텐션 고르는 알고리즘 ㄱㄱ
+# 탑노트 위치를 잡고 서브도미넌트도 결국 텐션은 다이아토닉.... 다이아토닉 스케일에 인덱스 0,1,2,3 으로 대입해서 텐션을 고르고 어보이드 노트는 빼는 방법
+
 import os
 import pygame
 import time
@@ -33,6 +36,7 @@ class musico():
         # 조성, 다이아토닉 코드 리스트 를 속성으로 갖는다
         self._key = key
         self._dia_chords = []
+
         # 메이져키인지 마이너키인지 확인
         if 'm' in key:  # 마이너 인 경우
             # 근음의 위치 인덱스 반환
@@ -64,21 +68,17 @@ class musico():
     def four_part(self, topnote, chord):
         # 탑 노트 아래로 메커니컬 보이싱을 생성
         # 모든 음역대를 선택하고 위에서 4개의 음만 반환하는 방식으로 시작하자
-        chord_func = ['', '']
-        topnote_func = ['', '']
         voicing_tone = []
         # 입력받은 코드의 기능 분리
-        chord_func[0], chord_func[1] = self.chord_func_decollate(chord)
-        print(chord_func)
+        chord_func = self.decollate_chord_func(chord)
         # 탑 노트 기능 분리
-        if len(topnote) == 3:
-            topnote_func[0], topnote_func[1] = topnote[:2], topnote[2:]
-        else:
-            topnote_func[0], topnote_func[1] = topnote[:1], topnote[1:]
-
+        topnote_func = self.decollate_topnote_func(topnote)
         # 탑 노트 아래의 음역대를 선택(슬라이싱)
-        topnote_idx = musico._sorted_chromatic_scale.index(topnote)
-        sliced_chro_fromTop = musico._sorted_chromatic_scale[:topnote_idx]ㅂ
+        sliced_chro_fromTop = self.get_scale_range(topnote)
+        # 텐션 찾기
+        tensions = self.get_tension(chord_func)
+        # 찾은 텐션으로 보이싱 경우의 수 만들기(코드폼 반환)
+        tension_tone = self.tension_voicing(tensions, chord_func)
         # 코드의 근음 위치 선택/ 탑노트와 같은 옥타브 또는 아래쪽에 코드근음이 있는지 확인
         if chord_func[0]+topnote_func[1] in sliced_chro_fromTop:    # 같은 옥타브에 근음이있는 경우
             # 근음 위치 인덱스구하기
@@ -100,6 +100,9 @@ class musico():
                     voicing_tone.append(sliced_chro_fromTop[Root_idx+idx])
                 except:
                     voicing_tone.append(sliced_chro_fromTop[Root_idx-12+idx])
+
+        # 드랍 하기
+
         # 마지막으로 탑노트와 베이스근음 넣기
         voicing_tone.append(topnote)
         voicing_tone.append(chord_func[0]+'1')
@@ -110,10 +113,10 @@ class musico():
         for note in notes:
             pygame.mixer.Sound(
                 date_path+'/'+note+'.wav').play()
-            time.sleep(0.01)
+            # time.sleep(0.1)
         time.sleep(1)
 
-    def chord_func_decollate(self, chord):
+    def decollate_chord_func(self, chord):
         # 먼저 앞2글자 슬라이싱
         front_2str = chord[1:2]
         if 'b' in front_2str:   # b인 경우
@@ -122,9 +125,58 @@ class musico():
         else:                    # b이 아닌경우
             note = chord[:1]
             chord_form = chord[1:]
-        return note, chord_form
+        return [note, chord_form]
 
+    def decollate_topnote_func(self, topnote):
+        # 탑 노트 기능 분리
+        topnote_func = ['', '']
+        if len(topnote) == 3:
+            topnote_func[0], topnote_func[1] = topnote[:2], topnote[2:]
+        else:
+            topnote_func[0], topnote_func[1] = topnote[:1], topnote[1:]
+        return topnote_func
 
+    def get_scale_range(self, topnote):
+        topnote_idx = musico._sorted_chromatic_scale.index(topnote)
+        sliced_chro_fromTop = musico._sorted_chromatic_scale[:topnote_idx]
+        return sliced_chro_fromTop
+
+    def get_tension(self, cho_func):
+        # 다이아토닉노트
+        notes = []
+        # {다른노트의 카테고리 인덱스:다른노트의 값 차이}
+        chord_compare = {}
+        for dia in self._dia_chords:
+            notes.append(dia[0])
+        print(notes)
+        # 코드를 다이아토닉스케일과 비교 다이아토닉코드인지, 서브도미넌트 코드인지, 그것도 아니면 아웃
+
+        # 코드가 몇번째 다이아토닉음인지 확인
+        try:
+            dia_chord_idx = notes.index(cho_func[0])
+        except:         # 아니면 종료
+            print('다이아토닉도, 서브도미넌트도 아닙니다')
+            return
+        # 입력받은 코드값과 다이아토닉 코드 비교
+        # 다이아토닉 코드톤 =  코드폼간격[다이아토닉 코드들[입력된 노트의 다이아토닉 순서]]
+        dia_chord_notes = musico._chord_tone[musico._sorted_dia_chord_form[dia_chord_idx][1]]
+        # 입력받은 코드톤 = 코드폼간격[입력받은 코드폼]
+        input_chord_notes = musico._chord_tone[cho_func[1]]
+        # 인덱스=같은카테고리, 끼리 비교해서 같은 코드톤인지 다르면 어디가 다른지 확인
+        for i in range(0, len(input_chord_notes)):  # 3화음이면 3번비교 4화음이면 4번 비교
+            if input_chord_notes[i] == dia_chord_notes[i]:
+                pass
+            else:   # 다이아토닉이 아니면 비교값을 저장
+                chord_compare[i] = input_chord_notes[i] - dia_chord_notes[i]
+        # 다이아토닉 스케일을 코드를 근음으로 재정열 하고 인덱스를 이용해서 카테고리화, 텐션음들을 저장
+        resorted_notes = notes[dia_chord_idx:]+notes[:dia_chord_idx]
+        print(resorted_notes)
+        tensions = [resorted_notes[1], resorted_notes[3], resorted_notes[5]]
+        return tensions
+
+    def tension_voicing(self, tensions, cho_func):
+        # 근음 카테고리
+        pass
 # def play_diatonic7th_chord_progression(chromatic_scales, dia_note_idx,  dia_chord_form):
     #     # 완성된 다이아토닉 코드변수 [0]계이름,[1]코드폼
     #     diatonic = []
@@ -177,6 +229,6 @@ date_path = os.path.join(current_path, "data")
 scale_list = os.listdir(date_path)
 
 C = musico("C")
-C.four_part('Db4', 'Db7')
+C.four_part('E4', 'Am7')
 
 # root.mainloop()
