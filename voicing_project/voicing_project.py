@@ -10,6 +10,8 @@
 
 # 현재 탑노트 아래로 closed voicing 만들었으니까 이제 카테고리 보이싱 추가해보자@@ 다이아토닉이랑 연계해서 텐션 고르는 알고리즘 ㄱㄱ
 # 탑노트 위치를 잡고 서브도미넌트도 결국 텐션은 다이아토닉.... 다이아토닉 스케일에 인덱스 0,1,2,3 으로 대입해서 텐션을 고르고 어보이드 노트는 빼는 방법
+# drop 하기/ 인풋[코드톤, 보이싱톤] - 연산[1,3 인덱스의 값을 -1한다] - 아웃풋[주어진 화음으로 2,2&4 만들기]
+
 
 import os
 import pygame
@@ -65,10 +67,10 @@ class musico():
     def progression():
         pass
 
-    def four_part(self, topnote, chord, Tension, time):
+    def four_part(self, topnote, chord, Tension, drop, time):
         # 탑 노트 아래로 메커니컬 보이싱을 생성
         # 모든 음역대를 선택하고 위에서 4개의 음만 반환하는 방식으로 시작하자
-        voicing_tone = []
+        voicing_tone = [[], []]
         # 입력받은 코드의 기능 분리
         chord_func = self.decollate_chord_func(chord)
         # 탑 노트 기능 분리
@@ -93,9 +95,10 @@ class musico():
             for idx in the_chord:
                 # 근음부터 위로 올라가면서 코드톤 쌓고 탑노트 위에 음은 옥타브 내리기
                 try:
-                    voicing_tone.append(sliced_chro_fromTop[Root_idx+idx])
+                    voicing_tone[0].append(sliced_chro_fromTop[Root_idx+idx])
                 except:
-                    voicing_tone.append(sliced_chro_fromTop[Root_idx-12+idx])
+                    voicing_tone[1].append(
+                        sliced_chro_fromTop[Root_idx-12+idx])
         else:                                                       # 같은 옥타브에 근음이 없는 경우
             # 근음 위치 인덱스구하기(한옥타브 낮춰서)
             Root_idx = sliced_chro_fromTop.index(
@@ -103,15 +106,18 @@ class musico():
             # 코드폼 인덱스 가져와서 한개씩 값 대입
             for idx in the_chord:
                 try:
-                    voicing_tone.append(sliced_chro_fromTop[Root_idx+idx])
+                    voicing_tone[0].append(sliced_chro_fromTop[Root_idx+idx])
                 except:
-                    voicing_tone.append(sliced_chro_fromTop[Root_idx-12+idx])
-
+                    voicing_tone[1].append(
+                        sliced_chro_fromTop[Root_idx-12+idx])
+        # 옥타브 변경된 노트들 음높이 순서대로 다시 정렬
+        voicing_tone = voicing_tone[1]+voicing_tone[0]
         # 드랍 하기
-
+        if drop[0] == True:
+            self.drop_24(voicing_tone, drop)
         # 마지막으로 탑노트와 베이스근음 넣기
-        voicing_tone.append(chord_func[0]+'1')
-        voicing_tone.insert(0, topnote)
+        voicing_tone.append(topnote)
+        voicing_tone.insert(0, chord_func[0]+'1')
         # 사운드 플레이
         self.play_notes(voicing_tone, time)
 
@@ -198,13 +204,14 @@ class musico():
         voicing_tone = []
         # 인풋코드의 카테고리별 텐션 넣기
         # 근음 카테고리: 9
-        if 9 in Tension[1] and cho_func[0] != self._dia_chords[paralal+2][0]:   # 프리지안이 아닌경우
+        if 9 in Tension[1] and cho_func[0]+cho_func[1] != self._dia_chords[paralal+2]:   # 프리지안이 아닌경우
             voicing_tone.append(tension_tone[0])    # 9,b9
         else:
             voicing_tone.append(0)
         # voicing_tone.append(tension_tone[0]+2)  # #9
         # 3음 카테고리 : 9,11
-        if 11 in Tension[1] and cho_func[0] != self._dia_chords[paralal][0]:    # 아이오니안이 아닌 경우
+        # 아이오니안이 아닌 경우
+        if 11 in Tension[1] and cho_func[0]+cho_func[1] != self._dia_chords[paralal]:
             voicing_tone.append(tension_tone[1])    # 11,#11
         else:
             voicing_tone.append(musico._chord_tone[cho_func[1]][1])
@@ -220,6 +227,17 @@ class musico():
             pass
         return voicing_tone
 
+    def drop_24(self, chord, num):
+        # 코드의 1,3 인덱스의 마지막문자열(숫자)를 -1 하고 문자열로 다시 더하기
+        # drop 2
+        drop2 = str(int(chord[3][-1:]) - 1)
+        chord.insert(0, chord[3][:-1]+drop2)
+        del chord[4]
+        if num[1] == 4:
+            drop4 = str(int(chord[2][-1:]) - 1)
+            chord.insert(0, chord[2][:-1]+drop4)
+            del chord[3]
+        return chord
 # def play_diatonic7th_chord_progression(chromatic_scales, dia_note_idx,  dia_chord_form):
     #     # 완성된 다이아토닉 코드변수 [0]계이름,[1]코드폼
     #     diatonic = []
@@ -277,20 +295,20 @@ tension_list = [[9], [13], [11], [9, 11], [9, 13], [11, 13], [9, 11, 13]]
 
 # for i in tension_list:
 
-C.four_part('G3', 'CM7', [True, [9, 13]], 3)
-C.four_part('C4', 'E7', [True, [9, 13]], 2)
-C.four_part('Ab3', 'E7', [True, [9, 13]], 1.5)
-C.four_part('B3', 'FM7', [True, [9, 13]], 2)
-C.four_part('A3', 'FM7', [True, [9, 13]], 1.5)
-C.four_part('A3', 'A7', [True, [9, 13]], 3)
-C.four_part('A3', 'Dm7', [True, [9, 13]], 3)
-C.four_part('F4', 'A7', [True, [9, 13]], 2)
-C.four_part('Db4', 'A7', [True, [9, 13]], 1.5)
-C.four_part('E4', 'D7', [True, [9, 13]], 2)
-C.four_part('D4', 'D7', [True, [9, 13]], 1.5)
-C.four_part('D4', 'G7', [True, [9, 13]], 1.5)
-C.four_part('E4', 'G7', [True, [9, 13]], 1.5)
-C.four_part('F4', 'G7', [True, [9, 13]], 1.5)
+C.four_part('G4', 'CM7', [True, [9, 13]], [True, 4], 3)
+C.four_part('C4', 'E7', [True, [9, 13]], [True, 4], 2)
+C.four_part('Ab3', 'E7', [True, [9, 13]], [True, 4], 1.5)
+C.four_part('B3', 'FM7', [True, [9, 13]], [True, 4], 2)
+C.four_part('A3', 'FM7', [True, [9, 13]], [True, 4], 1.5)
+C.four_part('A3', 'A7', [True, [9, 13]], [True, 4], 3)
+C.four_part('A3', 'Dm7', [True, [9, 13]], [True, 4], 3)
+C.four_part('F4', 'A7', [True, [9, 13]], [True, 4], 2)
+C.four_part('Db4', 'A7', [True, [9, 13]], [True, 4], 1.5)
+C.four_part('E4', 'D7', [True, [9, 13]], [True, 4], 2)
+C.four_part('D4', 'D7', [True, [9, 13]], [True, 4], 1.5)
+C.four_part('D4', 'G7', [True, [9, 13]], [True, 4], 1.5)
+C.four_part('E4', 'G7', [True, [9, 13]], [True, 4], 1.5)
+C.four_part('F4', 'G7', [True, [9, 13]], [True, 4], 1.5)
 
 
 # root.mainloop()
