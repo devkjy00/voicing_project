@@ -19,6 +19,7 @@ import time
 from tkinter import *
 
 
+
 class musico():
     _chromatic_scales = ['C', 'Db', 'D', 'Eb',
                          'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
@@ -63,9 +64,6 @@ class musico():
             self._dia_chords.append(
                 [resorted_cromatic[note], dia_chord_form[idx][1]])
         print(self._key, "key :", self._dia_chords)
-
-    def progression():
-        pass
 
     def four_part(self, topnote, chord, Tension, drop, time):
         # 탑 노트 아래로 메커니컬 보이싱을 생성
@@ -238,77 +236,37 @@ class musico():
             chord.insert(0, chord[2][:-1]+drop4)
             del chord[3]
         return chord
-# def play_diatonic7th_chord_progression(chromatic_scales, dia_note_idx,  dia_chord_form):
-    #     # 완성된 다이아토닉 코드변수 [0]계이름,[1]코드폼
-    #     diatonic = []
-    #     # 코드생성 근음의 옥타브 변수
-    #     Root_octave = '3'
-    #     # 슬라이싱에 쓸 루트위치 인덱스
-    #     Root_idx = 0
-    #     # 다이아토닉에 대입해서 코드진행 생성
-    #     chord_progression = [1, 5, 6, 4, 3, 6, 2, 5]
-    #     # 코드진행에 따른 코드순서리스트 완성값
-    #     diatonic_progression = []
 
-    #     # 다이아토닉 완성 시키기 :[0]정렬된 크로매틱[음 위치] [1]정렬된 코드폼  순서대로 대입
-    #     for idx, note in enumerate(dia_note_idx):
-    #         diatonic.append([chromatic_scales[note], dia_chord_form[idx][1]])
-    #     # 코드진행따라서 다이아토닉 코드 순서대로 리스트에 넣기
-    #     for i in chord_progression:
-    #         diatonic_progression.append(diatonic[i-1])
-
-    #     for chord in diatonic_progression:
-    #         # 코드근음 위치: 코드근음+옥타브
-    #         Root = chord[0] + Root_octave
-    #         # 4옥타브 크로매틱에서 근음의 인덱스 반환
-    #         Root_idx = sorted_chromatic_scale.index(Root)
-    #         # 근음 인덱스을 기준으로 슬라이싱하기
-    #         sliced_cro_scale = sorted_chromatic_scale[Root_idx:]
-    #         # 진행중인 코드근음으로 시작하는 스케일, 코드 톤 음 간격 을 인자로 코드를 연주하는 함수
-    #         print(sliced_cro_scale)
-    #         play_chord(sliced_cro_scale, musico._dia_chord_tone[chord[1]],)
-    #         time.sleep(1)
+def play_overtherainbow():
+    C.four_part('G4', 'CM7', [True, [9, 13]], [True, 4], 3)
+    C.four_part('C4', 'E7', [True, [9, 13]], [True, 4], 2)
+    C.four_part('Ab3', 'E7', [True, [9, 13]], [True, 4], 1.5)
+    C.four_part('B3', 'FM7', [True, [9, 13]], [True, 4], 2)
+    C.four_part('A3', 'FM7', [True, [9, 13]], [True, 4], 1.5)
+    C.four_part('A3', 'A7', [True, [9, 13]], [True, 4], 3)
+    C.four_part('A3', 'Dm7', [True, [9, 13]], [True, 4], 3)
+    C.four_part('F4', 'A7', [True, [9, 13]], [True, 4], 2)
+    C.four_part('Db4', 'A7', [True, [9, 13]], [True, 4], 1.5)
+    C.four_part('E4', 'D7', [True, [9, 13]], [True, 4], 2)
+    C.four_part('D4', 'D7', [True, [9, 13]], [True, 4], 1.5)
+    C.four_part('D4', 'G7', [True, [9, 13]], [True, 4], 1.5)
+    C.four_part('E4', 'G7', [True, [9, 13]], [True, 4], 1.5)
+    C.four_part('F4', 'G7', [True, [9, 13]], [True, 4], 1.5)
 
 
-# def go():
-#     print(entry)
-#     key = entry.get()
-#     sorted_scale, sorted_interval, diatonic_chords = sort_by_key(key)
-#     play_diatonic7th_chord_progression(sorted_interval, sorted_scale, diatonic_chords)
-# root = Tk()
 pygame.mixer.init()
-
-
-# frame = Frame(root).pack()
-# entry = Entry(frame)
-# entry.pack()
-# btn = Button(frame, text="다이아토닉 재생", command=go).pack(side="left")
-
 # 파일 위치
 current_path = os.path.dirname(__file__)
 date_path = os.path.join(current_path, "data")
 scale_list = os.listdir(date_path)
 
+
+
+
 C = musico("C")
 tension_list = [[9], [13], [11], [9, 11], [9, 13], [11, 13], [9, 11, 13]]
 
-
-# for i in tension_list:
-
-C.four_part('G4', 'CM7', [True, [9, 13]], [True, 4], 3)
-C.four_part('C4', 'E7', [True, [9, 13]], [True, 4], 2)
-C.four_part('Ab3', 'E7', [True, [9, 13]], [True, 4], 1.5)
-C.four_part('B3', 'FM7', [True, [9, 13]], [True, 4], 2)
-C.four_part('A3', 'FM7', [True, [9, 13]], [True, 4], 1.5)
-C.four_part('A3', 'A7', [True, [9, 13]], [True, 4], 3)
-C.four_part('A3', 'Dm7', [True, [9, 13]], [True, 4], 3)
-C.four_part('F4', 'A7', [True, [9, 13]], [True, 4], 2)
-C.four_part('Db4', 'A7', [True, [9, 13]], [True, 4], 1.5)
-C.four_part('E4', 'D7', [True, [9, 13]], [True, 4], 2)
-C.four_part('D4', 'D7', [True, [9, 13]], [True, 4], 1.5)
-C.four_part('D4', 'G7', [True, [9, 13]], [True, 4], 1.5)
-C.four_part('E4', 'G7', [True, [9, 13]], [True, 4], 1.5)
-C.four_part('F4', 'G7', [True, [9, 13]], [True, 4], 1.5)
+play_overtherainbow()
 
 
-# root.mainloop()
+
