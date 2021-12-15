@@ -1,0 +1,18 @@
+코드의 속성을 파라미터로 넣으면 화성학 이론에 따라서 연주하거나 예외발생
+
+class CromaticScale
+```크로매틱 스케일 관련 정보, 컴포지션```
+    def sort_by_note(self, note: str): -> list
+        ``` 
+        노트를 기준으로 스케일을 정렬해서 반환 
+        param : note "C" ~ "B"까지 노트
+        ```
+    
+
+class Diatonic()
+``` 곡의 조성 정보 생성```
+
+class Voicer()
+``` 코드 보이싱 생성```
+메서드 
+
