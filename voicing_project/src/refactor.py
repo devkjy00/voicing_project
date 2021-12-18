@@ -4,15 +4,21 @@
 class ChromaticScale:
     def __init__(self) -> None:
         '''음역대 정보'''
-        self._chromatic_scales = ('C', 'Db', 'D', 'Eb',
+        self._chromatic_scale = ('C', 'Db', 'D', 'Eb',
                          'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B')
-        self._octaves = ('1', '2', '3', '4')
+        self._octave = ('1', '2', '3', '4')
         self._long_chromatic = self.get_long_chromatic()
-        print(self._long_chromatic)
+        
     def get_long_chromatic(self):  
         ''' C1~B4 생성  '''
         return tuple(i + j for j in self._octaves
-                        for i in self._chromatic_scales)
+                        for i in self._chromatic_scale)
+    
+    def sort_chromatic_by(self, key):
+        prev_scale = self._chromatic_scale
+        idx = prev_scale.index(key)
+        self._chromatic_scale = prev_scale[idx:]+prev_scale[:idx]
+    
 
 class SongKey:
     
