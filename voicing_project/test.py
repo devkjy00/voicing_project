@@ -1,6 +1,6 @@
 import pytest
 from unittest import TestCase, main
-from refactor import SongKey, Voicer, ChromaticScale
+from refactor import Chord, Voicer, ChromaticScale
 
 
 
@@ -63,7 +63,8 @@ def test_get_long_chromatic(chromatic_scale):
 
 def test_sort_chromatic_by(chromatic_scale):
     chromatic_scale.sort_chromatic_by("E")
-    assert chromatic_scale._chromatic_scale == ("E", "F", "Gb", "G", "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb")
+    assert chromatic_scale._chromatic_scale == ["E", "F", "Gb", "G", 
+    "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb"]
         
 @pytest.fixture
 def voicer():
@@ -71,9 +72,8 @@ def voicer():
     return voicer
 
 
-@pytest.fixture
-def song_key():
-    song_key = SongKey()
-    return song_key
+def test_chord():
+    chord = Chord('D')
+    assert chord.dictonic == [['D', 'M7'], ['E', 'm7'], ['Gb', 'm7'], 
+    ['G', 'M7'], ['A', '7'], ['B', 'm7'], ['Db', 'm7b5']]
 
-def 
