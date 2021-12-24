@@ -1,4 +1,4 @@
-myDB_project
-__pycache__/
-venv/
+/myDB_project
+voicing_project/__pycache__
+/venv
                       
