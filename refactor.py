@@ -1,7 +1,7 @@
 
 
 class ChromaticScale:
-    def __init__(self) -> None:
+    def __init__(self):
         '''스케일 정보'''
         self._chromatic_scale = ['C', 'Db', 'D', 'Eb',
                          'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
@@ -10,12 +10,12 @@ class ChromaticScale:
         self._major_dia_scale_idx = [0, 2, 4, 5, 7, 9, 11]
         self._minor_dia_scale_idx = [0, 2, 3, 5, 7, 8, 10]
         
-    def _get_long_chromatic(self) -> None:  
+    def _get_long_chromatic(self):  
         ''' C1~B4 튜플 생성  '''
         return tuple(i + j for j in self._octave
-                        for i in self._chromatic_scale)
+                         for i in self._chromatic_scale)
     
-    def sort_chromatic_by(self, key: str) -> None: 
+    def sort_chromatic_by(self, key: str): 
         '''
         속성 self._chromatic_scale을 입력된 key가 첫 인덱스가 되도록 정렬
         '''
@@ -29,7 +29,7 @@ def assert_key(key: str):
     assert len(key) < 3, f'{key}는 잘못된 key 입니다'
 
 class Chord(ChromaticScale):
-    def __init__(self, key: str = 'C') -> None:
+    def __init__(self, key: str = 'C'):
         ''' 코드 정보 '''
         super().__init__()
         assert_key(key)
@@ -43,11 +43,11 @@ class Chord(ChromaticScale):
         self.set_minor_attr() if 'm' in self._key else self.set_major_attr()
         self.dictonic = self._get_diatonic()
 
-    def set_minor_attr(self) -> None:
+    def set_minor_attr(self):
         self._diatonic_note_idx = self._minor_dia_scale_idx
         self._resort_minor_dia_chord_form()
 
-    def set_major_attr(self) -> None:
+    def set_major_attr(self):
         self._diatonic_note_idx = self._major_dia_scale_idx
 
     def _get_diatonic(self) -> list:
@@ -59,7 +59,7 @@ class Chord(ChromaticScale):
         diatonic_chords = []
             
         self.sort_chromatic_by(self._key) # self._chromatic_scale 정렬
-
+ 
         for idx, note in enumerate(self._diatonic_note_idx):
             diatonic_chords.append(
                 [self._chromatic_scale[note], 
@@ -67,7 +67,7 @@ class Chord(ChromaticScale):
 
         return diatonic_chords
 
-    def _resort_minor_dia_chord_form(self) -> None:
+    def _resort_minor_dia_chord_form(self):
         '''
         self._sorted_dia_chord_form 리스트를 메이져에서 마이너로 다시 정렬
         '''
@@ -79,7 +79,7 @@ class Chord(ChromaticScale):
    
 class Voicer:
 
-    def __init__(self) -> None:
+    def __init__(self):
         pass
 
     
