@@ -1,5 +1,5 @@
 # TDD로 다시 짜기
-
+import timeit
 
 
 class ChromaticScale:
@@ -88,3 +88,4 @@ class Voicer:
 
 C = Chord()
 print(C.dictonic)
+timeit.timeit(D = Chord())
