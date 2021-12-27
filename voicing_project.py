@@ -16,7 +16,7 @@
 import os
 import pygame
 import time
-from tkinter import *
+
 
 
 
