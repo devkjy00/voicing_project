@@ -1,7 +1,5 @@
-from typing import Tuple, Union, Any
-
 from pygame import mixer
-# import time
+import time
 import os
 
 
@@ -43,7 +41,7 @@ class ChromaticScale:
         prev_scale = self._chromatic_scale
         idx = prev_scale.index(key)
         return prev_scale[idx:] + prev_scale[:idx]
-
+    
     def get_sliced_chromatic(self, top_note: str) -> list:
         """
         Slice self._long_chromatic attr from the top note
@@ -129,8 +127,8 @@ class Voicer(Chord):
         for i in self._chord_tone[chord_form]:
             note = chord_scale[i]
             voicing_notes.append(note)
-
-        print(voicing_notes)
+        
+        return voicing_notes
         # try:
         #     voicing_notes[0].append(root_idx)
         # except:
@@ -174,20 +172,34 @@ class Voicer(Chord):
 class Play:
     # 파일 위치
     current_path = os.path.dirname(__file__)
-    date_path = os.path.join(current_path, "data")
+    data_path = os.path.join(current_path, "data")
+    mixer.init()
 
     def __init__(self, key: str = 'C') -> None:
-        mixer.init()
         self.voicer = Voicer(key)
+        self.chord = []
 
-    # @staticmethod
-    # def play(notes: list):
-    #     for note in notes:
-    #         mixer.Sound(
-    #             cls.data_path + '/' + note + '.wav').play()
-    #         print(note)
-    #     time.sleep(1)
+    def add_chord(self, chord_num: str) -> None:
+        """
+        add chord_notes to self.chord 
+        :param chord_num: "2b7",,,
+        :return: None
+        """
+        self.chord.append(self.voicer.four_part_voicing(chord_num))
+        print(self.voicer.four_part_voicing(chord_num)) 
+        
 
+    def play(self):
+        for notes in self.chord:
+            for note in notes:
+                mixer.Sound(
+                    self.data_path + '/' + note + '3.wav').play()
+            time.sleep(1)
 
-C = Voicer()
-C.four_part_voicing('2b7')
+C = Play('C')
+C.add_chord('3b7')
+C.add_chord('2')
+C.add_chord('5')
+C.add_chord('1')
+C.play()
+
