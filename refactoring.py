@@ -109,37 +109,26 @@ class Voicer(Chord):
     def __init__(self, key: str = 'C'):
         super().__init__(key)
 
-    def four_part_voicing(self, chord_num: str):
+    def four_part_voicing(self, chord_num: str, top_note: str = 'G3'):
         """
         set notes of chord to play
         choose the octave of notes below top_note
-        if self._key = 'C', top_note = 'B4'
+        if self._key = 'C'
+        :param top_note: 'B4'
         :param chord_num: '1' / '2b7'
-        :return: ['C4', 'E4', 'G4', 'B3'] / ['Db', 'F', 'Ab', 'B']
+        :return: ['C4', 'E4', 'G4', 'B3'] / ['Db4', 'F4', 'Ab4', 'B3']
         """
         voicing_notes = []
         root, chord_form = self.parse_chord_num(chord_num)
-        all_scale = self.get_sliced_chromatic('B4')
-
-        # root_oct = root + '4' if root + '4' in all_scale else root + '3'
 
         chord_scale = self.sort_chromatic_by(root)
         for i in self._chord_tone[chord_form]:
             note = chord_scale[i]
             voicing_notes.append(note)
-        
-        return voicing_notes
-        # try:
-        #     voicing_notes[0].append(root_idx)
-        # except:
-        #     voicing_tone[1].append(
-        #         sliced_chro_fromTop[Root_idx - 12 + idx])
 
-        # chord_num = 1
-        # self.dictonic[chord_num]
-        # 슬라이스된 스케일에서 탑노트와 같은 옥타브에 근음이 있는지 확인
-        # 없으면 한옥타브 낮춰서 노트찾기
-        # 근음인덱스 찾고 코드폼대입해서 리스트반환
+        voicing_notes = self.set_octave(voicing_notes, top_note)
+
+        return voicing_notes
 
     def parse_chord_num(self, chord_num: str) -> tuple:
         """
@@ -168,6 +157,23 @@ class Voicer(Chord):
 
         return root, chord_form
 
+    def set_octave(self, notes: list, top_note: str):
+        """
+        set octave of notes below top note
+        :param notes: ['C', 'E', 'G', 'B']
+        :param top_note: 'G4'
+        :return: ['C4', 'E4', 'G3', 'B3']
+        """
+        all_scale = self.get_sliced_chromatic(top_note)
+        voicing_notes_with_octave = []
+
+        for note in notes:
+            for octave in self._octave[::-1]:
+                if (result := note+octave) in all_scale:
+                    voicing_notes_with_octave.append(result)
+                    break
+        return voicing_notes_with_octave
+
 
 class Play:
     # 파일 위치
@@ -181,20 +187,20 @@ class Play:
 
     def add_chord(self, chord_num: str) -> None:
         """
-        add chord_notes to self.chord 
+        add chord_notes to self. chord
         :param chord_num: "2b7",,,
         :return: None
         """
         self.chord.append(self.voicer.four_part_voicing(chord_num))
         print(self.voicer.four_part_voicing(chord_num)) 
-        
 
     def play(self):
         for notes in self.chord:
             for note in notes:
                 mixer.Sound(
-                    self.data_path + '/' + note + '3.wav').play()
+                    self.data_path + '/' + note + '.wav').play()
             time.sleep(1)
+
 
 C = Play('C')
 C.add_chord('3b7')

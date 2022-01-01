@@ -8,7 +8,7 @@ def chromatic_scale():
     return scales
 
 
-class Test_Chromatic():
+class TestChromatic:
 
     def test_get_long_chromatic(self, chromatic_scale):
         assert chromatic_scale._long_chromatic == (
@@ -62,29 +62,28 @@ class Test_Chromatic():
             "B4",
         ), "wrong chromatic_scale._long_chromatic"
 
-
-
     def test_sort_chromatic_by(self, chromatic_scale):
-        assert chromatic_scale.sort_chromatic_by('E')  == ["E", "F", "Gb", "G",
-                                         "Ab", "A", "Bb", "B", "C", "Db", "D", "Eb"], "wrong chromatic_scale.sort_chromatic_by"
+        assert chromatic_scale.sort_chromatic_by('E') == ["E", "F", "Gb", "G",
+                                                          "Ab", "A", "Bb", "B",
+                                                          "C", "Db", "D", "Eb"
+                                                          ], "wrong chromatic_scale.sort_chromatic_by"
 
     def test_get_sliced_chromatic(self, chromatic_scale):
-        assert chromatic_scale.get_sliced_chromatic('B1') == ( 
-        'C1', 'Db1', 'D1', 'Eb1', 'E1', 'F1', 
-            'Gb1', 'G1', 'Ab1', 'A1', 'Bb1' ), "wrong chromatic_scale.get_sliced_chromatic"
-
+        assert chromatic_scale.get_sliced_chromatic('B1') == (
+            'C1', 'Db1', 'D1', 'Eb1', 'E1', 'F1',
+            'Gb1', 'G1', 'Ab1', 'A1', 'Bb1'), "wrong chromatic_scale.get_sliced_chromatic"
 
 
 @pytest.fixture
 def chord():
     return Chord('C')
 
-class Test_Chord:
-    def test_chord_attribute(self, chord): 
+
+class TestChord:
+    def test_chord_attribute(self, chord):
         assert chord.diatonic == [['C', 'M7'], ['D', 'm7'], ['E', 'm7'],
                                   ['F', 'M7'], ['G', '7'], ['A', 'm7'], ['B', 'm7b5']], "wrong chord.diatonic"
-        assert chord._diatonic_note_idx == [0,2,4,5,7,9,11], "wrong chord._diatonic_note_idx"
-
+        assert chord._diatonic_note_idx == [0, 2, 4, 5, 7, 9, 11], "wrong chord._diatonic_note_idx"
 
 
 @pytest.fixture
@@ -92,3 +91,7 @@ def voicer():
     voicer = Voicer()
     return voicer
 
+
+class TestVoicer:
+    def test_four_part_voicing(self, voicer):
+        assert voicer('2b7') == ['Db4', 'F4', 'Ab4', 'B3'], "wrong four_part"
