@@ -94,4 +94,4 @@ def voicer():
 
 class TestVoicer:
     def test_four_part_voicing(self, voicer):
-        assert voicer('2b7') == ['Db4', 'F4', 'Ab4', 'B3'], "wrong four_part"
+        assert voicer.four_part_voicing('2b7') == ['Db4', 'F4', 'Ab4', 'B3'], "wrong four_part"

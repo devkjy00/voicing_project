@@ -109,7 +109,7 @@ class Voicer(Chord):
     def __init__(self, key: str = 'C'):
         super().__init__(key)
 
-    def four_part_voicing(self, chord_num: str, top_note: str = 'G3'):
+    def four_part_voicing(self, chord_num: str, top_note: str = 'B4'):
         """
         set notes of chord to play
         choose the octave of notes below top_note
@@ -119,18 +119,18 @@ class Voicer(Chord):
         :return: ['C4', 'E4', 'G4', 'B3'] / ['Db4', 'F4', 'Ab4', 'B3']
         """
         voicing_notes = []
-        root, chord_form = self.parse_chord_num(chord_num)
+        root, chord_form = self._parse_chord_num(chord_num)
 
         chord_scale = self.sort_chromatic_by(root)
         for i in self._chord_tone[chord_form]:
             note = chord_scale[i]
             voicing_notes.append(note)
 
-        voicing_notes = self.set_octave(voicing_notes, top_note)
+        voicing_notes = self._set_octave(voicing_notes, top_note)
 
         return voicing_notes
 
-    def parse_chord_num(self, chord_num: str) -> tuple:
+    def _parse_chord_num(self, chord_num: str) -> tuple:
         """
         Analyze chord_num
         if self._key is 'C'
@@ -157,7 +157,7 @@ class Voicer(Chord):
 
         return root, chord_form
 
-    def set_octave(self, notes: list, top_note: str):
+    def _set_octave(self, notes: list, top_note: str):
         """
         set octave of notes below top note
         :param notes: ['C', 'E', 'G', 'B']
@@ -185,13 +185,14 @@ class Play:
         self.voicer = Voicer(key)
         self.chord = []
 
-    def add_chord(self, chord_num: str) -> None:
+    def add_chord(self, chord_num: str, top_note: str = 'B4') -> None:
         """
         add chord_notes to self. chord
+        :param top_note: 'B4',,,
         :param chord_num: "2b7",,,
         :return: None
         """
-        self.chord.append(self.voicer.four_part_voicing(chord_num))
+        self.chord.append(self.voicer.four_part_voicing(chord_num, top_note))
         print(self.voicer.four_part_voicing(chord_num)) 
 
     def play(self):
@@ -203,7 +204,7 @@ class Play:
 
 
 C = Play('C')
-C.add_chord('3b7')
+C.add_chord('3b7', "G4")
 C.add_chord('2')
 C.add_chord('5')
 C.add_chord('1')
