@@ -54,8 +54,9 @@ class ChromaticScale:
 
 
 def assert_key(key: str):
-    assert type(key) == str, f'{key}는 잘못된 key 입니다'
-    assert len(key) < 3, f'{key}는 잘못된 key 입니다'
+    assert type(key) is str, f'{key}는 잘못된 key 입니다'
+    assert len(key) <= 2, f'{key}는 잘못된 key 입니다'
+    assert 'A' <= key <= 'G',  f'{key}는 잘못된 key 입니다'
 
 
 class Chord(ChromaticScale):
@@ -105,11 +106,15 @@ class Chord(ChromaticScale):
         return diatonic_chords
 
 
+def assert_chord(chord):
+    assert '1' <= chord[0] <= '7', f"{chord} is wrong chord_root"
+
+
 class Voicer(Chord):
     def __init__(self, key: str = 'C'):
         super().__init__(key)
 
-    def four_part_voicing(self, chord_num: str, top_note: str = 'B4'):
+    def four_part_voicing(self, chord: str, top_note: str = 'B4'):
         """
         set notes of chord to play
         choose the octave of notes below top_note
@@ -119,43 +124,60 @@ class Voicer(Chord):
         :return: ['C4', 'E4', 'G4', 'B3'] / ['Db4', 'F4', 'Ab4', 'B3']
         """
         voicing_notes = []
-        root, chord_form = self._parse_chord_num(chord_num)
+        root, chord_form = self._parse_chord_num(chord)
 
         chord_scale = self.sort_chromatic_by(root)
         for i in self._chord_tone[chord_form]:
             note = chord_scale[i]
             voicing_notes.append(note)
-
+        
         voicing_notes = self._set_octave(voicing_notes, top_note)
-
+        
+        # bass note append
+        voicing_notes.append(root+'1')
+   
         return voicing_notes
 
-    def _parse_chord_num(self, chord_num: str) -> tuple:
+    def _parse_chord_num(self, chord: str) -> tuple:
         """
         Analyze chord_num
         if self._key is 'C'
         :param chord_num: '2b7'
         :return: 'Db', '7'
         """
-        chord_root, *chord_form = chord_num
-
-        assert '0' < chord_root < '8', f"{chord_root} is wrong chord_root"
-
-        if chord_form:
-            root_idx = self._diatonic_note_idx[int(chord_root) - 1]
-
-            if 'b' in chord_form:
-                root_idx -= 1
-            if '#' in chord_form:
-                root_idx += 1
-
-            root = self._chromatic_scale[root_idx]
-            chord_form = '7'
-
+        assert_chord(chord)
+        
+        if len(chord) <= 1:
+            root, chord_form = self.diatonic[int(chord) - 1]
         else:
-            root, chord_form = self.diatonic[int(chord_root) - 1]
+            root = self._set_note(chord)
+            chord_form = (chord[2:] if chord[1] == 'b' or chord[1] == '#'  
+                          else chord[1:])
 
         return root, chord_form
+
+    def _set_note(self, note: str) -> str:
+        """
+        set note
+        if self._key is 'C'
+        :param note: '2b'
+        :return: 'Db'
+        """
+        accidentals = {'#': 1, 'b': -1}
+        
+        if len(note) >= 2:
+            accidental = note[1] 
+        
+        note = int(note[0])%8     
+        note_idx = self._diatonic_note_idx[note-1]
+        
+        if accidental in accidentals:
+            note_idx += accidentals[accidental]
+        note = self._chromatic_scale[note_idx]
+                
+        return note
+
+
 
     def _set_octave(self, notes: list, top_note: str):
         """
@@ -192,21 +214,31 @@ class Play:
         :param chord_num: "2b7",,,
         :return: None
         """
-        self.chord.append(self.voicer.four_part_voicing(chord_num, top_note))
         print(self.voicer.four_part_voicing(chord_num)) 
+        self.chord.append(self.voicer.four_part_voicing(chord_num, top_note))
 
     def play(self):
         for notes in self.chord:
+            print(notes)
+            if type(notes) is str:
+                mixer.Sound(
+                    self.data_path + '/' + notes + '.wav').play()
+                time.sleep(2)
+                continue
+
             for note in notes:
+                print(note)
                 mixer.Sound(
                     self.data_path + '/' + note + '.wav').play()
-            time.sleep(1)
+            time.sleep(2)
 
 
-C = Play('C')
-C.add_chord('3b7', "G4")
-C.add_chord('2')
-C.add_chord('5')
-C.add_chord('1')
-C.play()
+
+D = Play('D')
+D.add_chord('5m7')
+D.add_chord('4m7')
+D.add_chord('7b7')
+D.add_chord('1m')
+
+D.play()
 
