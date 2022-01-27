@@ -1,7 +1,9 @@
 from pygame import mixer
 import time
 import os
+import re
 
+# 정규식을 사용해서 텐션  읽기
 
 class ChromaticScale:
     def __init__(self, key: str) -> None:
@@ -9,8 +11,8 @@ class ChromaticScale:
                                  'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
         self._octave = ('1', '2', '3', '4')
         self._long_chromatic = self._get_long_chromatic()
-        self._major_dia_scale_idx = [0, 2, 4, 5, 7, 9, 11]
-        self._minor_dia_scale_idx = [0, 2, 3, 5, 7, 8, 10]
+        self._major_dia_scale_idx = (0, 2, 4, 5, 7, 9, 11)
+        self._minor_dia_scale_idx = (0, 2, 3, 5, 7, 8, 10)
         self._sort_chromatic_by(key)
 
     def _get_long_chromatic(self) -> tuple:
@@ -70,7 +72,7 @@ class Chord(ChromaticScale):
             0, 3, 7, 10], '7': [0, 4, 7, 10], 'mb5': [0, 3, 6], 'm7b5': [0, 3, 6, 10]}
 
         self._diatonic_note_idx = []
-        # set _diatonic_note_idx
+        # set self._diatonic_note_idx
         self._set_minor_attr() if 'm' in self._key else self._set_major_attr()
 
         self.diatonic = self._get_diatonic()
@@ -124,7 +126,7 @@ class Voicer(Chord):
         :return: ['C4', 'E4', 'G4', 'B3'] / ['Db4', 'F4', 'Ab4', 'B3']
         """
         voicing_notes = []
-        root, chord_form = self._parse_chord_num(chord)
+        root, chord_form, tension = self._parse_chord(chord)
 
         chord_scale = self.sort_chromatic_by(root)
         for i in self._chord_tone[chord_form]:
@@ -138,7 +140,15 @@ class Voicer(Chord):
    
         return voicing_notes
 
-    def _parse_chord_num(self, chord: str) -> tuple:
+    def _parse_chord(self, chord: str) -> tuple:
+        chord, *tension = re.split("[(),]", chord)
+        tension = [int(i) for i in tension if i != '']
+
+        root, chord_form = self._parse_chord_tone(chord)
+
+        return root, chord_form, tension
+
+    def _parse_chord_tone(self, chord: str) -> tuple:
         """
         Analyze chord_num
         if self._key is 'C'
@@ -176,8 +186,6 @@ class Voicer(Chord):
         note = self._chromatic_scale[note_idx]
                 
         return note
-
-
 
     def _set_octave(self, notes: list, top_note: str):
         """
@@ -219,7 +227,6 @@ class Play:
 
     def play(self):
         for notes in self.chord:
-            print(notes)
             if type(notes) is str:
                 mixer.Sound(
                     self.data_path + '/' + notes + '.wav').play()
@@ -227,7 +234,6 @@ class Play:
                 continue
 
             for note in notes:
-                print(note)
                 mixer.Sound(
                     self.data_path + '/' + note + '.wav').play()
             time.sleep(2)
@@ -241,4 +247,6 @@ D.add_chord('7b7')
 D.add_chord('1m')
 
 D.play()
+#D = Voicer("C")
+#print(D._parse_chord("1m7(9, 13)"))
 

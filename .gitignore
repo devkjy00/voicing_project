@@ -1,6 +1,6 @@
 .DS_store
 .idea
+*.swp
 
 __pycache__/
 
-voice/
