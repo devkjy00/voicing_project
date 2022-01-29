@@ -4,8 +4,8 @@ import os
 import re
 
 
-# 코드에 텐션음 추가하기
-# 디폴트로 다이아토닉 노트의 텐션설정
+# 크로매틱 스케일을 활용해서 텐션을 넓은 범위로 선택
+# 어보이드 노트 처리 필요
 
 class ChromaticScale:
     def __init__(self, key: str) -> None:
@@ -129,15 +129,13 @@ class Voicer(Chord):
         """
         voicing_notes = []
         root, chord_form, tension = self._parse_chord(chord)
-
         chord_scale = self.sort_chromatic_by(root)
-        print(chord_scale)
+
         for i in self._chord_tone[chord_form]:
             note = chord_scale[i]
             voicing_notes.append(note)
 
-        for i in tension:
-            note = chord_scale[i]
+        for note in tension:
             voicing_notes.append(note)
 
         voicing_notes = self._set_octave(voicing_notes, top_note)
@@ -151,7 +149,7 @@ class Voicer(Chord):
         chord, *tension = re.split("[(),]", chord)
 
         root, chord_form = self._parse_chord_tone(chord)
-        # tension = self._parse_tension(root, tension)
+        tension = self._parse_tension(tension)
 
         return root, chord_form, tension
 
@@ -167,21 +165,19 @@ class Voicer(Chord):
         if len(chord) <= 1:
             root, chord_form = self.diatonic[int(chord) - 1]
         else:
-            root = self._set_note(chord)
             chord_form = (chord[2:] if chord[1] == 'b' or chord[1] == '#'
                           else chord[1:])
+            root = self._set_note(chord.replace(chord_form,""))
 
         return root, chord_form
 
-    # def _parse_tension(self, root: str,  note: list) -> tuple:
-    #     tension_map =
-    #     diatonic_scale = self._get_diatonic_scale()
-    #     tension = [i for i in note if i != '']
-    #
-    # def _get_diatonic_scale(self) -> list:
-    #     return [diatonic[0] for diatonic in self.diatonic]
+    def _parse_tension(self, tension: list) -> tuple:
+        tension_idx = [self._set_note(note) for note in tension
+                            if note]
 
-    def _set_note(self, note: str) -> str:
+        return tension_idx
+
+    def _set_note(self, note: str, root: str = None) -> str:
         """
         set note
         if self._key is 'C'
@@ -189,18 +185,23 @@ class Voicer(Chord):
         :return: 'Db'
         """
         accidentals = {'#': 1, 'b': -1}
+        accidental = None
 
-        if len(note) >= 2:
-            accidental = note[1]
+        if '#' in note or 'b' in note: 
+            note, accidental = note[:-1], note[-1] 
 
-        note = int(note[0]) % 8
+        note = int(note) % 7
         note_idx = self._diatonic_note_idx[note - 1]
 
-        if accidental in accidentals:
+        if accidental:
             note_idx += accidentals[accidental]
-        note = self._chromatic_scale[note_idx]
 
-        return note
+        if root==None:
+            note_result = self._chromatic_scale[note_idx]
+        else:
+            note_result = self.sort_chromatic_by(root)[note_idx]
+
+        return note_result
 
     def _set_octave(self, notes: list, top_note: str):
         """
@@ -254,13 +255,6 @@ class Play:
                     self.data_path + '/' + note + '.wav').play()
             time.sleep(2)
 
-
-D = Play('D')
-D.add_chord('5m7')
-D.add_chord('4m7')
-D.add_chord('7b7')
-D.add_chord('1m')
-
+D = Play("C")
+D.add_chord("17(9, 11)")
 D.play()
-# D = Voicer("C")
-# print(D._parse_chord("1m7(9, 13)"))
