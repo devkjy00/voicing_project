@@ -5,6 +5,7 @@ import re
 
 
 # 크로매틱 스케일을 활용해서 텐션을 넓은 범위로 선택
+# 테스트 코드를 짜자
 # 어보이드 노트 처리 필요
 
 class ChromaticScale:
@@ -256,5 +257,8 @@ class Play:
             time.sleep(2)
 
 D = Play("C")
-D.add_chord("17(9, 11)")
+D.add_chord("2")
+D.add_chord("6")
+D.add_chord("5")
+D.add_chord("1")
 D.play()

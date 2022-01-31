@@ -83,7 +83,7 @@ class TestChord:
     def test_chord_attribute(self, chord):
         assert chord.diatonic == [['C', 'M7'], ['D', 'm7'], ['E', 'm7'],
                                   ['F', 'M7'], ['G', '7'], ['A', 'm7'], ['B', 'm7b5']], "wrong chord.diatonic"
-        assert chord._diatonic_note_idx == [0, 2, 4, 5, 7, 9, 11], "wrong chord._diatonic_note_idx"
+        assert chord._diatonic_note_idx == (0, 2, 4, 5, 7, 9, 11), "wrong chord._diatonic_note_idx"
 
 
 @pytest.fixture
@@ -94,4 +94,4 @@ def voicer():
 
 class TestVoicer:
     def test_four_part_voicing(self, voicer):
-        assert voicer.four_part_voicing('2b7') == ['Db4', 'F4', 'Ab4', 'B3'], "wrong four_part"
+        assert voicer.four_part_voicing('2b7') == ['Db4', 'F4', 'Ab4', 'B3', 'Db1'], "wrong four_part"
