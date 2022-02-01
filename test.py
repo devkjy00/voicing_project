@@ -1,4 +1,4 @@
-from refactoring import Chord, Voicer, ChromaticScale
+from refactoring import Chord, Voicer, ChromaticScale, Play
 import pytest
 
 
@@ -6,6 +6,17 @@ import pytest
 def chromatic_scale():
     scales = ChromaticScale('C')
     return scales
+
+def test_key():
+    assert Play(11) == Exception
+
+    # assert Voicer(11) == '11는 잘못된 key 입니다'
+    # assert Chord(11) == '11는 잘못된 key 입니다'
+    # assert ChromaticScale(11) == '11는 잘못된 key 입니다'
+    # assert Play("") == '는 잘못된 key 입니다'
+    # assert Voicer("") == '는 잘못된 key 입니다'
+    # assert Chord("") == '는 잘못된 key 입니다'
+    # assert ChromaticScale("") == '는 잘못된 key 입니다'
 
 
 class TestChromatic:
