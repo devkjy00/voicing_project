@@ -8,15 +8,24 @@ def chromatic_scale():
     return scales
 
 def test_key():
-    assert Play(11) == Exception
+    with pytest.raises(AssertionError):
+        Play(11) 
+        Voicer(11)
+        Chord(11)
+        ChromaticScale(11) 
+        Play("") 
+        Voicer("") 
+        Chord("") 
+        ChromaticScale("") 
+        Play("abc") 
+        Voicer("abc") 
+        Chord("abc") 
+        ChromaticScale("abc") 
+        Play("Rd")
+        Voicer("Rd")
+        Chord("Rd")
+        ChromaticScale("Rd")
 
-    # assert Voicer(11) == '11는 잘못된 key 입니다'
-    # assert Chord(11) == '11는 잘못된 key 입니다'
-    # assert ChromaticScale(11) == '11는 잘못된 key 입니다'
-    # assert Play("") == '는 잘못된 key 입니다'
-    # assert Voicer("") == '는 잘못된 key 입니다'
-    # assert Chord("") == '는 잘못된 key 입니다'
-    # assert ChromaticScale("") == '는 잘못된 key 입니다'
 
 
 class TestChromatic:
