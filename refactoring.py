@@ -60,7 +60,11 @@ class ChromaticScale:
 
 def assert_key(key: str):
     assert type(key) is str, f'{key}는 잘못된 type 입니다'
-    assert len(key) <= 2, f'{key}는 잘못된 key 입니다'
+    if len(key)==2:
+        assert key[1]=="b" or key[1]=="#", f'{key}는 잘못된 key 입니다'
+    elif len(key)>2:
+        raise AssertionError 
+
     assert 'A' <= key <= 'G', f'{key}는 잘못된 key 입니다'
 
 
@@ -262,6 +266,3 @@ class Play:
 # D.add_chord("5")
 # D.add_chord("1")
 # D.play()
-R = Play("AA")
-R.add_chord("2")
-R.play()

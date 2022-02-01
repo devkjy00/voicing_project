@@ -10,22 +10,10 @@ def chromatic_scale():
 def test_key():
     with pytest.raises(AssertionError):
         Play(11) 
-        Voicer(11)
-        Chord(11)
-        ChromaticScale(11) 
-        Play("") 
-        Voicer("") 
-        Chord("") 
-        ChromaticScale("") 
-        Play("abc") 
-        Voicer("abc") 
-        Chord("abc") 
-        ChromaticScale("abc") 
-        Play("Rd")
-        Voicer("Rd")
-        Chord("Rd")
-        ChromaticScale("Rd")
-
+    with pytest.raises(AssertionError):
+        Play('abc') 
+    with pytest.raises(AssertionError):
+        Play("AA") 
 
 
 class TestChromatic:
